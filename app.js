@@ -29,6 +29,10 @@ const userRoutes = require("./routes/users")
 const channelRoutes = require("./routes/channels")
 const messageRoutes = require("./routes/messages")
 
+app.get("/", (req, res) => {
+    res.end("Welcome")
+})
+
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/channels", channelRoutes)
 app.use("/api/v1/messages", messageRoutes)

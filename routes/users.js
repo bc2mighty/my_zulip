@@ -64,7 +64,7 @@ router.put("/", webtoken.verifyToken, async(req, res) => {
     }
 })
 
-router.post("/", webtoken.verifyToken, async(req, res, next) => {
+router.post("/", async(req, res, next) => {
     try{
         const user = await User.findOne({email: req.body.email})          
         if(user){

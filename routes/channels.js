@@ -3,9 +3,9 @@ const router = express.Router()
 const User = require("../models/user")
 const Channel = require("../models/channel")
 const { Validator } = require('node-input-validator')
+const webtoken = require("./webtoken")
 
-
-router.get("/", async(req, res) => {
+router.get("/", webtoken.verifyToken, async(req, res) => {
     try{
         const channels = await Channel.find({})
         res.status(200).json({message: "Channels Details found successfully", channels: channels})
@@ -14,7 +14,7 @@ router.get("/", async(req, res) => {
     }
 })
 
-router.get("/:id", async(req, res) => {
+router.get("/:id", webtoken.verifyToken, async(req, res) => {
     try{
         const channel = await Channel.findOne({_id: req.params.id})       
         res.status(200).json({message: "Channel Details found successfully", channel: channel})
@@ -23,7 +23,7 @@ router.get("/:id", async(req, res) => {
     }
 })
 
-router.post("/", async(req, res) => {
+router.post("/", webtoken.verifyToken, async(req, res) => {
     try{
         const v = new Validator(req.body, {
             name: 'required',
@@ -45,7 +45,7 @@ router.post("/", async(req, res) => {
     }
 })
 
-router.put("/", async(req, res) => {
+router.put("/", webtoken.verifyToken, async(req, res) => {
     try{
         const v = new Validator(req.body, {
             name: 'required',
@@ -72,7 +72,7 @@ router.put("/", async(req, res) => {
     }
 })
 
-router.delete("/", async(req, res) => {
+router.delete("/", webtoken.verifyToken, async(req, res) => {
     try{
         const channel = await Channel.findOneAndDelete({_id: req.body._id})
         if(channel){
@@ -93,6 +93,23 @@ function pile_error_messages(errors){
         error_messages.push(obj)
     })
     return error_messages
+}
+
+async function verifyToken (req, res, next){
+    const bearerHeader = req.headers['authorization']
+    if(typeof bearerHeader !== 'undefined'){
+        const bearer = bearerHeader.split(" ")
+        const bearerToken = bearer[1]
+        req.token = bearerToken
+        await jwt.verify(req.token, "5b2f47da43492548593a2d0ecdc52f58", (err, authData) => {
+            if(err){
+                res.sendStatus(403)
+            }
+        })
+        next() 
+    }else{
+        res.sendStatus(403)
+    }
 }
 
 module.exports = router

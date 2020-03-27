@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Welcome Home Bruh!</h1>
+    <p>Adding To Channels</p>
+    <input type="text" id="userId" placeholder="User ID"/>
+    <input type="text" id="channelId" placeholder="Channel ID"/>
+    <input type="text" id="userName" placeholder="User's Name"/>
+    <br><br>
+    <p>Updating Channels</p>
+    <input type="text" id="channelIdUpdate" placeholder="Channel ID"/>
+    <input type="text" id="channel" placeholder="Channel Name"/>
+    <br><br>
+    <p>Deleting Channels</p>
+    <input type="text" id="channelIdDelete" placeholder="Channel ID"/>
+    <br><br>
+    <p>Sending Messages Channels</p>
+    <input type="text" id="userIdSend" placeholder="User ID"/>
+    <input type="text" id="message" placeholder="Message"/>
+    <br><br>
+    <p>Updating Messages</p>
+    <input type="text" id="messageIdUpdate" placeholder="Message ID"/>
+    <input type="text" id="messageUpdate" placeholder="Message"/>
+    <br><br>
+    <p>Deleting Messages</p>
+    <input type="text" id="messageIdDelete" placeholder="Message ID"/>
+    <br><br>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io("http://localhost:3000");
+        var userId = document.getElementById("userId") 
+        
+        //Joining Channel Socket
+        userId.addEventListener("keypress", (event) => {
+            let userIdVal = event.target.value
+            let channelIdVal = document.getElementById("channelId").value
+            let userName = document.getElementById("userName").value
+            if(event.key == "Enter"){
+                socket.emit("join", {userId: userIdVal, channelId: channelIdVal, name: userName})
+            }
+        })
+
+        socket.on("joinMessage", (message) => {
+            console.log(message)            
+        })
+
+        //Updating Channels Socket
+        var channelIdUpdate = document.getElementById("channelIdUpdate"), channelInput = document.getElementById("channel")
+        
+        channel.addEventListener("keypress", (event) => {
+            channelInputVal = event.target.value
+            let channelIdUpdateVal = channelIdUpdate.value
+
+            if(event.key == "Enter"){
+                socket.emit("channelUpdate", {channelId: channelIdUpdateVal, channelValue: channelInputVal})
+            }
+        })
+
+        socket.on("channelUpdateConfirmed", (data) => {
+            console.log(data)            
+        })
+    </script>
+</body>
+</html>

@@ -4,15 +4,16 @@ const Message = require("../models/message")
 const User = require("../models/user")
 const Channel = require("../models/channel")
 const { Validator } = require('node-input-validator')
+const webtoken = require("./webtoken")
 
-router.post("/", async(req, res) => {
+router.post("/", webtoken.verifyToken, async(req, res) => {
     let message
     try{
         const v = new Validator(req.body, {
             channelId: 'required|minLength:10',
             userId: 'required|minLength:10',
             message: 'required'
-        })
+        })  
         const matched = await v.check()
         if(!matched){
             let error_messages = pile_error_messages(v.errors)
@@ -22,6 +23,8 @@ router.post("/", async(req, res) => {
             const user = await User.findOne({_id: req.body.userId})
             message = new Message(req.body)
             await message.save()
+            const io = req.app.get("socketio")
+            
             res.status(200).json({message: "Message Saved successfully", data: [{channel: channel}, {message: message}, {user: user}]})
         }
     }catch(err){
@@ -30,7 +33,7 @@ router.post("/", async(req, res) => {
     }
 })
 
-router.put("/", async(req, res) => {
+router.put("/", webtoken.verifyToken, async(req, res) => {
     try{
         const v = new Validator(req.body, {
             _id: 'required'
@@ -52,7 +55,7 @@ router.put("/", async(req, res) => {
     }
 })
 
-router.delete("/", async(req, res) => {
+router.delete("/", webtoken.verifyToken, async(req, res) => {
     try{
         const message = await Message.findOneAndDelete({_id: req.body._id})
         if(message){

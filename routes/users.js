@@ -4,6 +4,9 @@ const User = require("../models/user")
 const { Validator } = require('node-input-validator')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const webtoken = require("./webtoken")
+
+const jwt = require("jsonwebtoken")
 
 router.get("/", async(req, res, next) => {
     try{
@@ -19,7 +22,7 @@ router.get("/", async(req, res, next) => {
     }
 })
 
-router.put("/", async(req, res) => {
+router.put("/", webtoken.verifyToken, async(req, res) => {
     try{
         const v = new Validator(req.body, {
             firstName: 'required',
@@ -61,31 +64,30 @@ router.put("/", async(req, res) => {
     }
 })
 
-router.post("/", async(req, res, next) => {
+router.post("/", webtoken.verifyToken, async(req, res, next) => {
     try{
-        const user = await User.findOne({email: req.body.email})      
+        const user = await User.findOne({email: req.body.email})          
         if(user){
-            bcrypt.compare(req.body.password, user.password, function(err, result) {
-                if(err){
-                    console.log(err) 
-                    res.status(422).json({
-                        message: "Error Getting User Details",
-                        users: user
-                    })
-                }else{
-                    if(result){
-                        res.status(200).json({
-                            message: "User Details Found Successfully",
-                            user: user
-                        })
-                    }else{
-                        res.status(422).json({
-                            message: "Users Password is Incorrect",
-                            users: req.body
-                        })
+            const match = await bcrypt.compare(req.body.password, user.password)
+            if(match){
+                await jwt.sign({data: user}, '5b2f47da43492548593a2d0ecdc52f58', {expiresIn: 60 * 60 * 24}, (err, token) => {
+                    if(err){
+                        console.log(err)                                
+                        res.status(500).json({message: "Token Could not be generated. Please try logging in again!"})
                     }
-                }
-            })
+                    res.status(200).json({
+                        message: "User Details Found Successfully",
+                        user: user,
+                        token: token
+                    })
+                })
+            }else{
+                console.log(err) 
+                res.status(422).json({
+                    message: "Users Password is Incorrect",
+                    users: req.body
+                })
+            }
         }else{      
             res.status(422).json({
                 message: "Email Not Found",
@@ -99,8 +101,9 @@ router.post("/", async(req, res, next) => {
     }
 })
 
-router.post("/new", async(req, res, next) => {
+router.post("/new", webtoken.verifyToken, async(req, res, next) => {
     try{ 
+        // console.log("Hi",io)  
         const v = new Validator(req.body, {
             firstName: 'required',
             lastName: 'required',
@@ -143,7 +146,7 @@ router.post("/new", async(req, res, next) => {
     }
 })
 
-router.delete("/", async(req, res) => {
+router.delete("/", webtoken.verifyToken, async(req, res) => {
     try{
         const user = await User.findOneAndDelete({_id: req.body._id})
         if(user){
@@ -156,7 +159,7 @@ router.delete("/", async(req, res) => {
     }
 })
 
-router.post("/setAdmin", async(req, res) => {
+router.post("/setAdmin", webtoken.verifyToken, async(req, res) => {
     try{
         const user = await User.findOne({_id: req.body._id})
         if(user){
@@ -171,7 +174,7 @@ router.post("/setAdmin", async(req, res) => {
     }
 })
 
-router.post("/unsetAdmin", async(req, res) => {
+router.post("/unsetAdmin", webtoken.verifyToken, async(req, res) => {
     try{
         const user = await User.findOne({_id: req.body._id})
         if(user){

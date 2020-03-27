@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const User = require("../models/user")
 const Channel = require("../models/channel")
+const Message = require("../models/message")
 const { Validator } = require('node-input-validator')
 const webtoken = require("./webtoken")
 
@@ -20,6 +21,17 @@ router.get("/:id", webtoken.verifyToken, async(req, res) => {
         res.status(200).json({message: "Channel Details found successfully", channel: channel})
     }catch(err){
         res.status(422).json({message: err.name == "CastError" ? "Channel ID provided not found in database" : "Error Finding Channel Details", errors: err})
+    }
+})
+
+router.post("/messages", webtoken.verifyToken, async(req, res) => {
+    try{
+        const channel = await Channel.findOne({_id: req.body._id})
+        const messages = await Message.find({channelId: channel._id})
+        res.status(200).json({message: "Channel Details found successfully", channel: channel, messages: messages})
+    }catch(err){
+        console.log(err)        
+        res.status(422).json({message: "Some Errors Occured", errors: err})
     }
 })
 

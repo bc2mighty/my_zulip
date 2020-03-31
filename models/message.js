@@ -19,6 +19,18 @@ const messageSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    emojis: [
+        {
+            unified: String,
+            emoji: String,
+            originalUnified: String,
+            names: [
+
+            ],
+            activeSkinTone: String,
+            user: mongoose.Schema.Types.ObjectId
+        }
+    ],
     date:{
         type: Date,
         default: Date.now()

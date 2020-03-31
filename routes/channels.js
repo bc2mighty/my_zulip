@@ -37,14 +37,22 @@ router.post("/messages", webtoken.verifyToken, async(req, res) => {
 
 router.post("/user/add", webtoken.verifyToken, async(req, res) => {
     try{
-        const channel = await Channel.findOneAndUpdate({_id: req.body._id}, {
-            $push: {users: req.body.user_id}
-        }, {new: true})
-
-        if(channel){
-            res.status(200).json({message: "User Added to Channel Successfully"})
+        const user = await User.findOne({email: req.body.email})
+        const channel_users = await Channel.findOne({_id: req.body._id})
+        // console.log(channel_users.users)        
+        
+        if(!channel_users.users.includes(user._id)){
+            const channel = await Channel.findOneAndUpdate({_id: req.body._id}, {
+                $push: {users: user._id}
+            }, {new: true})
+    
+            if(channel){
+                res.status(200).json({message: "User Added to Channel Successfully"})
+            }else{
+                res.status(422).json({message: "Please provide valid channel ID and User ID"})
+            }
         }else{
-            res.status(422).json({message: "Please provide valid channel ID and User ID"})
+            res.status(422).json({message: "user already exists in the channel"})
         }
     }catch(err){
         console.log(err)        

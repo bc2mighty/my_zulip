@@ -56,6 +56,26 @@ router.post("/messages", webtoken.verifyToken, async(req, res) => {
     }
 })
 
+router.post("/user"/*, webtoken.verifyToken*/, async(req, res) => {
+    try{
+        const v = new Validator(req.body, {
+            _id: 'required'
+        })
+        const matched = await v.check();
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }else{
+            const channels = await Channel.find({"users": {"$in": req.body._id}})
+            res.status(200).json({message: "Channels for a user", channels: channels})
+        }
+    }catch(err){
+        console.log(err)
+        res.status(422).json({message: "Some Errors Occured", errors: err})
+    }
+})
+
 router.post("/user/add", webtoken.verifyToken, async(req, res) => {
     try{
         const v = new Validator(req.body, {

@@ -17,8 +17,19 @@ router.get("/", webtoken.verifyToken, async(req, res) => {
 
 router.get("/:id", webtoken.verifyToken, async(req, res) => {
     try{
-        const channel = await Channel.findOne({_id: req.params.id}).populate('users')
-        res.status(200).json({message: "Channel Details found successfully", channel: channel})
+        const v = new Validator(req.params, {
+            id: 'required'
+        })
+        const matched = await v.check();
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }else{
+            const channel = await Channel.findOne({_id: req.params.id}).populate('users')
+            const messages = await Message.find({channelId: channel._id})
+            res.status(200).json({message: "Channel Details found successfully", channel: channel, messages: messages})
+        }
     }catch(err){
         res.status(422).json({message: err.name == "CastError" ? "Channel ID provided not found in database" : "Error Finding Channel Details", errors: err})
     }
@@ -26,9 +37,19 @@ router.get("/:id", webtoken.verifyToken, async(req, res) => {
 
 router.post("/messages", webtoken.verifyToken, async(req, res) => {
     try{
-        const channel = await Channel.findOne({_id: req.body._id})
-        const messages = await Message.find({channelId: channel._id})
-        res.status(200).json({message: "Channel Details found successfully", channel: channel, messages: messages})
+        const v = new Validator(req.body, {
+            _id: 'required'
+        })
+        const matched = await v.check();
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }else{
+            const channel = await Channel.findOne({_id: req.body._id})
+            const messages = await Message.find({channelId: channel._id})
+            res.status(200).json({message: "Channel Details found successfully", channel: channel, messages: messages})
+        }
     }catch(err){
         console.log(err)        
         res.status(422).json({message: "Some Errors Occured", errors: err})
@@ -37,25 +58,36 @@ router.post("/messages", webtoken.verifyToken, async(req, res) => {
 
 router.post("/user/add", webtoken.verifyToken, async(req, res) => {
     try{
-        const user = await User.findOne({email: req.body.email})
-        const channel_users = await Channel.findOne({_id: req.body._id})
-        // console.log(channel_users.users)        
+        const v = new Validator(req.body, {
+            email: 'required|email',
+            _id: 'required'
+        })
+        const matched = await v.check();
         
-        if(!channel_users.users.includes(user._id)){
-            const channel = await Channel.findOneAndUpdate({_id: req.body._id}, {
-                $push: {users: user._id}
-            }, {new: true})
-    
-            if(channel){
-                res.status(200).json({message: "User Added to Channel Successfully"})
-            }else{
-                res.status(422).json({message: "Please provide valid channel ID and User ID"})
-            }
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
         }else{
-            res.status(422).json({message: "user already exists in the channel"})
+            const user = await User.findOne({email: req.body.email})
+            const channel_users = await Channel.findOne({_id: req.body._id})
+            // console.log(channel_users.users)        
+            
+            if(!channel_users.users.includes(user._id)){
+                const channel = await Channel.findOneAndUpdate({_id: req.body._id}, {
+                    $push: {users: user._id}
+                }, {new: true})
+        
+                if(channel){
+                    res.status(200).json({message: "User Added to Channel Successfully"})
+                }else{
+                    res.status(422).json({message: "Please provide valid channel ID and User ID"})
+                }
+            }else{
+                res.status(422).json({message: "user already exists in the channel"})
+            }
         }
     }catch(err){
-        console.log(err)        
+        console.log(err)
         res.status(422).json({message: "Some Errors Occured", errors: err})
     }
 })
@@ -111,6 +143,15 @@ router.put("/", webtoken.verifyToken, async(req, res) => {
 
 router.delete("/", webtoken.verifyToken, async(req, res) => {
     try{
+        const v = new Validator(req.body, {
+            _id: 'required'
+        })
+        const matched = await v.check();
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }
         const channel = await Channel.findOneAndDelete({_id: req.body._id})
         if(channel){
             res.status(200).json({message: "Channel Deleted Successfully"})

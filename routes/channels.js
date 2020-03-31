@@ -56,7 +56,7 @@ router.post("/messages", webtoken.verifyToken, async(req, res) => {
     }
 })
 
-router.post("/user"/*, webtoken.verifyToken*/, async(req, res) => {
+router.post("/user", webtoken.verifyToken, async(req, res) => {
     try{
         const v = new Validator(req.body, {
             _id: 'required'

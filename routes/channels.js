@@ -17,7 +17,7 @@ router.get("/", webtoken.verifyToken, async(req, res) => {
 
 router.get("/:id", webtoken.verifyToken, async(req, res) => {
     try{
-        const channel = await Channel.findOne({_id: req.params.id})       
+        const channel = await Channel.findOne({_id: req.params.id}).populate('users')
         res.status(200).json({message: "Channel Details found successfully", channel: channel})
     }catch(err){
         res.status(422).json({message: err.name == "CastError" ? "Channel ID provided not found in database" : "Error Finding Channel Details", errors: err})
@@ -29,6 +29,23 @@ router.post("/messages", webtoken.verifyToken, async(req, res) => {
         const channel = await Channel.findOne({_id: req.body._id})
         const messages = await Message.find({channelId: channel._id})
         res.status(200).json({message: "Channel Details found successfully", channel: channel, messages: messages})
+    }catch(err){
+        console.log(err)        
+        res.status(422).json({message: "Some Errors Occured", errors: err})
+    }
+})
+
+router.post("/user/add", webtoken.verifyToken, async(req, res) => {
+    try{
+        const channel = await Channel.findOneAndUpdate({_id: req.body._id}, {
+            $push: {users: req.body.user_id}
+        }, {new: true})
+
+        if(channel){
+            res.status(200).json({message: "User Added to Channel Successfully"})
+        }else{
+            res.status(422).json({message: "Please provide valid channel ID and User ID"})
+        }
     }catch(err){
         console.log(err)        
         res.status(422).json({message: "Some Errors Occured", errors: err})

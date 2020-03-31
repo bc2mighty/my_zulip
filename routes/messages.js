@@ -41,7 +41,7 @@ router.post("/emojis", webtoken.verifyToken, async(req, res) => {
             if(message){
                 res.status(200).json({message: "Emoji Added To Message Successfully"})
             }else{
-                res.status(422).json({message: "Please provide valid Message ID and Emoji Details"})
+                res.status(422).json({message: "Please provide valid Message ID,User ID and Emoji Details"})
             }
         }
     }catch(err){

@@ -112,7 +112,7 @@ router.post("/", async(req, res, next) => {
     }
 })
 
-router.post("/new", webtoken.verifyToken, async(req, res, next) => {
+router.post("/new", async(req, res, next) => {
     try{ 
         // console.log("Hi",io)  
         const v = new Validator(req.body, {

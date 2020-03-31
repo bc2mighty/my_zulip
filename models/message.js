@@ -11,6 +11,10 @@ const messageSchema = mongoose.Schema({
         ref: 'Channel',
         required: true,
     },
+    conversationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Conversation',
+    },
     message: {
         type: String,
         required: true

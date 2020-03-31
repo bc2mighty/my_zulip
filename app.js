@@ -34,10 +34,12 @@ app.use((error, req, res, next) => {
 const userRoutes = require("./routes/users")
 const channelRoutes = require("./routes/channels")
 const messageRoutes = require("./routes/messages")
+const conversationRoutes = require("./routes/conversations")
 
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/channels", channelRoutes)
 app.use("/api/v1/messages", messageRoutes)
+app.use("/api/v1/conversations", conversationRoutes)
 
 const server = http.createServer(app)
 
@@ -53,12 +55,13 @@ io.on("connection", (socket) => {
     //Emit after Joining a channel
     //Expecting channelId, name
     socket.on("join", (data) => {
-        socket.broadcast.to(data.channelId).emit('joinMessage', {user: 'admin', text: `${data.name} has joined the room`})
+        socket.broadcast.to(data.channelId).emit('joinMessage', {user: 'admin', text: `${data.name} has joined the channel`})
         socket.join(data.channelId)
     })
 
     socket.on("disconnect", () => {
-
+        socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
+        socket.off()
     })
 
     //Emit after Updating a channel

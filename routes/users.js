@@ -8,7 +8,7 @@ const webtoken = require("./webtoken")
 
 const jwt = require("jsonwebtoken")
 
-router.get("/", async(req, res, next) => {
+router.get("/", webtoken.verifyToken, async(req, res, next) => {
     try{
         const users = await User.find()
         res.status(200).json({

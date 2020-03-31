@@ -50,6 +50,73 @@ router.post("/emojis", webtoken.verifyToken, async(req, res) => {
     }
 })
 
+router.put("/emojis", webtoken.verifyToken, async(req, res) => {
+    try{
+        const v = new Validator(req.body, {
+            _id: 'required',
+            emoji_id: 'required',
+            user_id: 'required',
+            unified: 'required',
+            emoji: 'required',
+            originalUnified: 'required',
+            names: 'required|array',
+            'names.*': 'required',
+            _id: 'required',
+        })
+
+        const matched = await v.check();
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }else{
+            const message = await Message.findOneAndUpdate({"emojis": {$elemMatch: {_id: req.body.emoji_id}}}, {
+                $set: {
+                    "emojis.$.user": req.body.user_id,
+                    "emojis.$.unified": req.body.unified,
+                    "emojis.$.emoji": req.body.emoji,
+                    "emojis.$.originalUnified": req.body.originalUnified,
+                    "emojis.$.names": req.body.names,
+                    "emojis.$.activeSkinTone": req.body.activeSkinTone
+                }
+            }, {new: true})
+            res.status(200).json({message: "Emoji Updated Successfully", data: {message: message}})
+        }
+    }catch(err){
+        console.log(err)
+        res.status(422).json({message: "Some Errors Occured", errors: err})
+    }
+})
+
+router.delete("/emojis", webtoken.verifyToken, async(req, res) => {
+    try{
+        const v = new Validator(req.body, {
+            _id: 'required',
+            emoji_id: 'required'
+        })
+        const matched = await v.check()
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }else{
+            const message = await Message.findOneAndUpdate({_id: req.body._id}, {
+                "$pull" : {
+                    "emojis": {_id: req.body.emoji_id}
+                }
+            },{
+                new: true
+            })
+            console.log(message)
+            
+            res.status(200).json({message: "Emoji Deleted Successfully", data: {message: message}})
+        }
+    }catch(err){
+        console.log(err)
+        res.status(422).json({message: "Some Errors Occured", errors: err})
+    }
+})
+
 router.post("/", webtoken.verifyToken, async(req, res) => {
     let message
     try{

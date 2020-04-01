@@ -124,7 +124,7 @@ router.post("/", webtoken.verifyToken, async(req, res) => {
             channelId: 'required|minLength:10',
             userId: 'required|minLength:10',
             message: 'required'
-        })  
+        })       
         const matched = await v.check()
         if(!matched){
             let error_messages = pile_error_messages(v.errors)
@@ -132,6 +132,7 @@ router.post("/", webtoken.verifyToken, async(req, res) => {
         }else{
             const channel = await Channel.findOne({_id: req.body.channelId})
             const user = await User.findOne({_id: req.body.userId})
+            console.log(req.body)   
             message = new Message(req.body)
             await message.save()
             const io = req.app.get("socketio")

@@ -59,23 +59,30 @@ io.on("connection", (socket) => {
         socket.join(data.channelId)
     })
 
-    socket.on("disconnect", () => {
-        socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
-        socket.off()
+    //Emit after Dsiconnectng from socket
+    //Expecting channelId, name
+    socket.on("disconnect", (reason) => {
+        if (reason === 'io server disconnect') {
+          // the disconnection was initiated by the server, you need to reconnect manually
+          socket.connect();
+        }else{
+            socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
+            socket.disconnect()
+        }
     })
 
     //Emit after Updating a channel
-    //Expecting channelId
+    //Expecting channelId, channel
     socket.on("channelUpdate", (data) => {
         console.log(data)    
-        io.to(data.channelId).emit("channelUpdateConfirmed", {message: `${data.channelValue} Channel Updated!`})
+        io.to(data.channelId).emit("channelUpdateConfirmed", {message: `${data.channel} Channel Updated!`, channel: data.channel})
     })
 
     //Emit after deleting a message
-    //Expecting channelId
+    //Expecting channelId, channel
     socket.on("channelDelete", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("channelDeleteConfirmed", {message: `${data.channelValue} Channel Deleted!`})
+        io.to(data.channelId).emit("channelDeleteConfirmed", {message: `${data.channel} Channel Deleted!`, channel: data.channel})
     })
 
     //Emit after sending a message
@@ -86,17 +93,17 @@ io.on("connection", (socket) => {
     })
 
     //Emit after Update a message
-    //Expecting channelId, name, message
+    //Expecting channelId, messageId, message, name
     socket.on("updateMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("updateMessageConfirmed", {user: data.name, message: data.message})
+        io.to(data.channelId).emit("updateMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
     })
 
     //Emit after Deleting a message
-    //Expecting channelId, name, message
+    //Expecting channelId, messageId, name, message
     socket.on("deleteMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.name, message: data.message})
+        io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
     })
 })
 

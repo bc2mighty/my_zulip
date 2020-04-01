@@ -4,6 +4,11 @@ const conversationSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    messageId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        unique: true
+    },
     channelId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true

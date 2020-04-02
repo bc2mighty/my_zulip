@@ -86,21 +86,21 @@ io.on("connection", (socket) => {
     socket.on("sendMessage", (data) => {
         console.log(data)
         // const message = Message.findOn
-        io.to(data.channelId).emit("sendMessageConfirmed", {user: data.name, message: data.message})
+        io.to(data.channelId).emit("sendMessageConfirmed", {user: data.user, message: data.message})
     })
 
     //Emit after Update a message
     //Expecting channelId, messageId, message, name
     socket.on("updateMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("updateMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
+        io.to(data.channelId).emit("updateMessageConfirmed", {user: data.user, message: data.message})
     })
 
     //Emit after Deleting a message
     //Expecting channelId, messageId, name, message
     socket.on("deleteMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
+        io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.user, message: data.message})
     })
 })
 

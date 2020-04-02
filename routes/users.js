@@ -64,6 +64,28 @@ router.put("/", webtoken.verifyToken, async(req, res) => {
     }
 })
 
+router.post("/details", webtoken.verifyToken, async(req, res) => {
+    try{
+        const v = new Validator(req.body, {
+            _id: 'required'
+        })
+        const matched = await v.check();
+        
+        if (!matched) {
+            let error_messages = pile_error_messages(v.errors)
+            res.status(422).json({message: "Validation Error", errors: error_messages})
+        }else{
+            const user = await User.findOne({_id: req.body._id}) 
+            res.status(200).json({
+                message: "User Details Found Successfully",
+                user: user
+            })
+        }
+    }catch(err){
+        res.status(422).json({message: err.name == "CastError" ? "User ID provided not found in database" : "Error Getting User", errors: err})
+    }
+})
+
 router.post("/", async(req, res, next) => {
     try{
         const v = new Validator(req.body, {

@@ -49,8 +49,8 @@ router.post('/', webtoken.verifyToken, async(req, res , next) =>{
             let error_messages = pile_error_messages(v.errors)
             res.status(422).json({message: "Validation Error", errors: error_messages})
         }else{
-            const conversation = await Conversation.find({messageId: req.body.messageId})
-            if(!conversation.length){
+            const conversation = await Conversation.findOne({messageId: req.body.messageId})
+            if(conversation === null){
                 const channel = await Channel.findOne({_id: req.body.channelId})
                 const message = await Message.findOne({_id: req.body.messageId})
                 const convo = new Conversation(req.body)
@@ -60,7 +60,7 @@ router.post('/', webtoken.verifyToken, async(req, res , next) =>{
                     createdConvo:convo
                 })
             }else{
-                res.status(422).json({message: "Conversation with that messageId already exists."})
+                res.status(422).json({message: "Conversation with that messageId already exists.", conversationId: conversation._id})
             }
         }
     }catch(err){

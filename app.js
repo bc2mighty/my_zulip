@@ -55,6 +55,7 @@ io.on("connection", (socket) => {
     //Emit after Joining a channel
     //Expecting channelId, name
     socket.on("join", (data) => {
+        console.log("Someone joined")        
         socket.broadcast.to(data.channelId).emit('joinMessage', {user: 'admin', text: `${data.name} has joined the channel`})
         socket.join(data.channelId)
     })
@@ -84,21 +85,22 @@ io.on("connection", (socket) => {
     //Expecting channelId, name, message
     socket.on("sendMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("sendMessageConfirmed", {user: data.name, message: data.message})
+        // const message = Message.findOn
+        io.to(data.channelId).emit("sendMessageConfirmed", {user: data.user, message: data.message})
     })
 
     //Emit after Update a message
     //Expecting channelId, messageId, message, name
     socket.on("updateMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("updateMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
+        io.to(data.channelId).emit("updateMessageConfirmed", {user: data.user, message: data.message})
     })
 
     //Emit after Deleting a message
     //Expecting channelId, messageId, name, message
     socket.on("deleteMessage", (data) => {
         console.log(data)
-        io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
+        io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.user, message: data.message})
     })
 })
 

@@ -15,6 +15,7 @@ const Channel = require("./models/channel")
 
 app.use(bodyParser.urlencoded({extended: false, limit: "10mb"}))
 app.use(bodyParser.json({limit: "10mb"}))
+app.use(cors())
 app.use(morgan("dev"))
 
 const mongoose = require("mongoose")
@@ -46,7 +47,6 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + '/index.html')
 })
 
-app.use(cors())
 //Socket IO Connection Part
 const io = socketio(server)
 io.on("connection", (socket) => {

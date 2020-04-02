@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
           // the disconnection was initiated by the server, you need to reconnect manually
           socket.connect();
         }else{
-            socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
+            // socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
             socket.disconnect()
         }
     })

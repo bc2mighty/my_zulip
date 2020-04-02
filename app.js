@@ -62,13 +62,8 @@ io.on("connection", (socket) => {
     //Emit after Dsiconnectng from socket
     //Expecting channelId, name
     socket.on("disconnect", (reason) => {
-        if (reason === 'io server disconnect') {
-          // the disconnection was initiated by the server, you need to reconnect manually
-          socket.connect();
-        }else{
-            // socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
-            socket.disconnect()
-        }
+        // socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
+        socket.disconnect()
     })
 
     //Emit after Updating a channel

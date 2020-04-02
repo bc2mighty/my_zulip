@@ -43,12 +43,17 @@ app.use("/api/v1/conversations", conversationRoutes)
 
 const server = http.createServer(app)
 
+const port = process.env.PORT || 3000
+app.set('socketio', io)
+
+//Socket IO Connection Part
+const io = socketio(server)
+server.listen(port)
+
 app.get("/", (req, res) => {
     res.sendFile(__dirname + '/index.html')
 })
 
-//Socket IO Connection Part
-const io = socketio(server)
 io.on("connection", (socket) => {
     console.log("yeah, connected to socket")
 
@@ -66,7 +71,6 @@ io.on("connection", (socket) => {
           // the disconnection was initiated by the server, you need to reconnect manually
           socket.connect();
         }else{
-            socket.broadcast.to(data.channelId).emit('leaveMessage', {user: 'admin', text: `${data.name} has left the channel`})
             socket.disconnect()
         }
     })
@@ -106,7 +110,3 @@ io.on("connection", (socket) => {
         io.to(data.channelId).emit("deleteMessageConfirmed", {user: data.name, messageId: data.messageId, message: data.message})
     })
 })
-
-const port = process.env.PORT || 3000
-app.set('socketio', io)
-server.listen(port)

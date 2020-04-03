@@ -60,7 +60,7 @@ router.post('/', webtoken.verifyToken, async(req, res , next) =>{
                     createdConvo:convo
                 })
             }else{
-                res.status(422).json({message: "Conversation with that messageId already exists.", conversationId: conversation._id})
+                res.status(200).json({message: "Conversation with that messageId already exists.", conversationId: conversation._id})
             }
         }
     }catch(err){
